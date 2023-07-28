@@ -1,0 +1,11 @@
+artifacts_root: artifacts
+
+data_ingestion:
+
+  root_dir: artifacts/data_ingestion
+  source_URL: https://s3.console.aws.amazon.com/s3/buckets/datasetsvinayak?region=eu-north-1
+  local_data_file: 
+  unzip_dir: 
+
+
+
