@@ -8,7 +8,7 @@ __version__ = "0.0.0"
 
 REPO_NAME = "IGF-CNN-research-deployment"
 AUTHOR_USER_NAME = "vinayaktiwari"
-SRC_REPO = "IgfCnnClassifier"
+SRC_REPO = "igfcnnClassifier"
 AUTHOR_EMAIL = "vinayaktiwari2897@gmail.com"
 
 

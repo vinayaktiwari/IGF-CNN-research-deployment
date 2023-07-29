@@ -5,7 +5,7 @@ from pathlib import Path
 logging.basicConfig(level =logging.INFO,
                      format='[%(asctime)s]: %(message)s:')
 
-project_name = "IgfCnnClassifier"
+project_name = "igfcnnClassifier"
 
 
 list_of_files = [

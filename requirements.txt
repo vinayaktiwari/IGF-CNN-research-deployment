@@ -14,4 +14,4 @@ types-PyYAML
 scipy
 Flask
 Flask-Cors
-cv2
+opencv-python

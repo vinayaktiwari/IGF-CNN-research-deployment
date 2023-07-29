@@ -1,11 +1,8 @@
-from IgfCnnClassifier.constants import *
-
-
+from src.igfcnnClassifier.constants import *
 import os
-
 from pathlib import Path
-from IgfCnnClassifier.utils.common import read_yaml,create_directories
-from IgfCnnClassifier.entity.config_entity import (DataIngestionConfig,
+from src.igfcnnClassifier.utils.common import read_yaml,create_directories
+from src.igfcnnClassifier.entity.config_entity import (DataIngestionConfig,
                                                 PrepareBaseModelConfig,
                                                 PrepareCallbacksConfig,
                                                 TrainingConfig,
@@ -19,7 +16,6 @@ class ConfigurationManager:
         self.config = read_yaml(config_filepath)
         self.params = read_yaml(params_filepath)
         create_directories([self.config.artifacts_root])
-
 
 
     def get_data_ingestion_config(self) -> DataIngestionConfig:
@@ -46,8 +42,6 @@ class ConfigurationManager:
             updated_base_model_path=Path(config.updated_base_model_path),
             params_image_size=self.params.IMAGE_SIZE,
             params_learning_rate=self.params.LEARNING_RATE,
-            params_include_top=self.params.INCLUDE_TOP,
-            params_weights=self.params.WEIGHTS,
             params_classes=self.params.CLASSES
         )
 
