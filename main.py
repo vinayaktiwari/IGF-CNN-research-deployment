@@ -2,7 +2,7 @@ import os
 from src.igfcnnClassifier import logger
 from src.igfcnnClassifier.pipeline.stage_01_data_ingestion import DataIngestionTrainingPipeline
 from src.igfcnnClassifier.pipeline.stage_02_prepare_base_model import PrepareBaseModelTrainingPipeline
-from src.igfcnnClassifier.pipeline. import ModelTrainingPipeline
+from src.igfcnnClassifier.pipeline.stage_03_training import ModelTrainingPipeline
 
 STAGE_NAME = "Data Ingestion"
 try:

@@ -1,27 +1,31 @@
-
+import numpy as np
 from src.igfcnnClassifier.entity.config_entity import TrainingConfig
+from src.igfcnnClassifier.components.prepare_model import PrepareBaseModel
+import ast
 import tensorflow as tf
 from pathlib import Path
-
+from src.igfcnnClassifier.entity.config_entity import PrepareBaseModelConfig
 
 class Training:
-    def __init__(self, config: TrainingConfig):
+    def __init__(self, config: TrainingConfig, model: PrepareBaseModel, config1: PrepareBaseModelConfig):
         self.config = config
+        self.config1 = config1
+        self.model = model
     
-    def get_base_model(self):
-        self.model = tf.keras.models.load_model(
-            self.config.updated_base_model_path
-        )
+    # def get_base_model(self):
+    #     self.model = tf.keras.models.load_model(
+    #         self.config.updated_base_model_path
+    #     )
     
     def train_valid_generator(self):
 
         datagenerator_kwargs = dict(
             rescale = 1./255,
-            validation_split=0.20
+            validation_split=0.10
         )
-
         dataflow_kwargs = dict(
-            target_size=self.config.params_image_size[:-1],
+            # target_size=self.config.params_image_size[:-1],
+            target_size=(250,250),
             batch_size=self.config.params_batch_size,
             interpolation="bilinear"
         )
@@ -62,20 +66,27 @@ class Training:
         model.save(path)
 
 
-    def train(self, callback_list: list):
+    def train(self):
         self.steps_per_epoch = self.train_generator.samples // self.train_generator.batch_size
         self.validation_steps = self.valid_generator.samples // self.valid_generator.batch_size
 
-        self.model.fit(
-            self.train_generator,
+        image_size_tuple = ast.literal_eval(self.config1.params_image_size)
+
+
+        model = self.model.IgfCNN(input_shape = image_size_tuple,
+            num_classes = self.config1.params_classes, 
+            size=50,
+            learning_rate=self.config1.params_learning_rate
+        )
+
+        model.fit(self.train_generator,
             epochs=self.config.params_epochs,
             steps_per_epoch=self.steps_per_epoch,
             validation_steps=self.validation_steps,
-            validation_data=self.valid_generator,
-            callbacks=callback_list
-        )
+            validation_data=self.valid_generator)
+            # callbacks=callback_list)
 
         self.save_model(
             path=self.config.trained_model_path,
-            model=self.model
+            model=model
         )

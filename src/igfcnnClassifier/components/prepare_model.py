@@ -10,7 +10,7 @@ from scipy import fftpack, ifft
 import numpy as np
 import ast
 from keras.models import save_model as keras_save_model
-
+import json
 
 
 class PrepareBaseModel:
@@ -49,10 +49,13 @@ class PrepareBaseModel:
         D = np.sqrt(U**2 + V**2)
         H = np.exp(-((D**2)/(2*(D0**2))))
         return H
+
     
     @staticmethod
     def indices(a, func):
         return [i for (i, val) in enumerate(a) if func(val)]
+    import tensorflow as tf
+
 
     @staticmethod
     def Fourier_decomposition(img):
@@ -60,40 +63,44 @@ class PrepareBaseModel:
         for i in range(1, 6):
             D0 = i * 0.007 * img.shape[1]
             H = PrepareBaseModel.lpfilter(img.shape[0], img.shape[1], D0)
+
             # Convert the input image to a complex tensor with real part as img and imaginary part as zeros
             img_complex = tf.complex(img, tf.zeros_like(img, dtype=tf.float32))
 
             # Perform the forward Fourier transform using TensorFlow's FFT
             F = tf.signal.fft2d(img_complex)
 
-            # Perform the inverse Fourier transform and take the real part using TensorFlow's IFFT
+            # Perform the element-wise multiplication instead of complex multiplication
             LPF_imageSignal_complex = H * F
-            LPF_imageSignal = tf.math.real(tf.signal.ifft2d(LPF_imageSignal_complex))
-    #         lpf = tf.squeeze(LPF_imageSignal, axis=-1)
-            
+
+            # Take the inverse Fourier transform using TensorFlow's IFFT
+            LPF_imageSignal_complex = tf.signal.ifft2d(LPF_imageSignal_complex)
+
+            # Convert the complex tensor back to a real-valued tensor by taking the real part
+            LPF_imageSignal = tf.math.real(LPF_imageSignal_complex)
+
             lpf = LPF_imageSignal[..., 0]
+
             # Append the LPF_imageSignal to FIBFs without the channel dimension
             FIBFs.append(lpf)
 
             # Subtract the LPF image signal from the original image
-            img = img - LPF_imageSignal
+            img = tf.math.real(img) - LPF_imageSignal
 
         # Append the final img to FIBFs without the channel dimension
-
-        FIBFs.append(img[..., 0])
+        FIBFs.append(tf.math.real(img)[..., 0])
         return FIBFs
 
     @staticmethod
-    def feat_concat(img,size,actual_image_size):
-        
+    def feat_concat(img, size, actual_image_size):
         # Expand the single-channel image to a three-channel image
-        img_expanded = tf.image.resize(img,(actual_image_size,actual_image_size))
+        img_expanded = tf.image.resize(img, (actual_image_size, actual_image_size))
         img_pseudo_bgr = tf.concat([img_expanded, img_expanded, img_expanded], axis=-1)
         img_gray = tf.image.rgb_to_grayscale(img_pseudo_bgr)
 
-        print("image_input",img_gray.shape)
+        print("image_input", img_gray.shape)
         FDM = PrepareBaseModel.Fourier_decomposition(img_gray)
-        
+
         FDM[0] = tf.expand_dims(FDM[0], axis=-1)
         FDM[1] = tf.expand_dims(FDM[1], axis=-1)
         FDM[2] = tf.expand_dims(FDM[2], axis=-1)
@@ -108,11 +115,20 @@ class PrepareBaseModel:
         FDM4 = tf.image.resize(FDM[4], (size, size), method=tf.image.ResizeMethod.BICUBIC)
         FDM5 = tf.image.resize(FDM[5], (size, size), method=tf.image.ResizeMethod.BICUBIC)
 
-        FDM_components = tf.stack([FDM1, FDM2, FDM3, FDM4, FDM5], axis=0)
+        # Convert tensors to real-valued tensors using tf.math.real
+        FDM_components = tf.stack(
+            [
+                tf.math.real(FDM1),
+                tf.math.real(FDM2),
+                tf.math.real(FDM3),
+                tf.math.real(FDM4),
+                tf.math.real(FDM5),
+            ],
+            axis=0,
+        )
 
-        FDM_components = tf.transpose(FDM_components, perm=[3,1,2,0])
+        FDM_components = tf.transpose(FDM_components, perm=[3, 1, 2, 0])
         FDM_components.set_shape([None, size, size, 5])
-
 
         return FDM_components
 
@@ -125,9 +141,7 @@ class PrepareBaseModel:
 
         x = Conv2D(32, kernel_size=(3, 3), strides=(1, 1), activation='relu')(processed_images)
     #     x = Conv2D(32, kernel_size=(3, 3), strides=(1, 1), activation='relu')(inputs)
-
     #     x = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(x)
-
         x = Conv2D(64, kernel_size=(3, 3), strides=(1, 1), activation='relu')(x)
     #     x = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(x)
         x = Conv2D(32, kernel_size=(3, 3), strides=(1, 1), activation='relu')(x)
@@ -151,7 +165,6 @@ class PrepareBaseModel:
             loss='categorical_crossentropy', 
             metrics=['accuracy'])
 
-
         model.summary()
         return model
 
@@ -163,18 +176,15 @@ class PrepareBaseModel:
         print("params_image_size:", image_size_tuple)
 
 
-
         self.model = self.IgfCNN(
             input_shape = image_size_tuple,
             num_classes = self.config.params_classes, 
             size=50,
             learning_rate=self.config.params_learning_rate)
         
-        self.save_model(path=self.config.updated_base_model_path, model=self.model)
+        return self.model
+        # self.save_model(path=self.config.updated_base_model_path, model=self.model)
 
-    @staticmethod
-    def save_model(path: Path, model: tf.keras.Model):
-        model.save(path)
-
-
-    
+    # @staticmethod
+    # def save_model(path: Path, model: tf.keras.Model):
+    #     model.save(path)

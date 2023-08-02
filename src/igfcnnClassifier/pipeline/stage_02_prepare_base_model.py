@@ -1,9 +1,7 @@
 from src.igfcnnClassifier.config.configuration import ConfigurationManager
 from src.igfcnnClassifier.components.prepare_model import PrepareBaseModel
 from src.igfcnnClassifier import logger
-# import sys
-# sys.path.append("/home/vinayak.t/IGF-CNN-research-deployment/src/igfcnnClassifier/components/")
-# import prepare_base_model
+
 
 
 STAGE_NAME = "Prepare base model"
