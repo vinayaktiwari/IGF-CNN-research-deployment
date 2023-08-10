@@ -1,7 +1,8 @@
 from src.igfcnnClassifier.config.configuration import ConfigurationManager
 from src.igfcnnClassifier.components.data_ingestion import DataIngestion
 from src.igfcnnClassifier import logger
-
+import sys
+print(sys.path)
 STAGE_NAME = "Data Ingestion"
 
 class DataIngestionTrainingPipeline:

@@ -12,7 +12,6 @@ import ast
 from keras.models import save_model as keras_save_model
 import json
 
-
 class PrepareBaseModel:
     def __init__(self, config: PrepareBaseModelConfig):
         self.config = config
@@ -58,7 +57,7 @@ class PrepareBaseModel:
 
 
     @staticmethod
-    def Fourier_decomposition(img):
+    def Fourier_decomposition1(img):
         FIBFs = []
         for i in range(1, 6):
             D0 = i * 0.007 * img.shape[1]
@@ -90,6 +89,22 @@ class PrepareBaseModel:
         # Append the final img to FIBFs without the channel dimension
         FIBFs.append(tf.math.real(img)[..., 0])
         return FIBFs
+    
+    @staticmethod
+    def Fourier_decomposition(img):
+        FIBFs = []
+        for i in range(1, 6):
+            D0 = i * 0.007 * img.shape[1]
+            H = PrepareBaseModel.lpfilter(img.shape[0], img.shape[1], D0)
+            img_complex = img
+            F = img_complex
+            LPF_imageSignal = H * F
+            lpf = LPF_imageSignal[..., 0]
+            FIBFs.append(lpf)
+            img = img - LPF_imageSignal
+        FIBFs.append(img[..., 0])
+        return FIBFs
+
 
     @staticmethod
     def feat_concat(img, size, actual_image_size):
@@ -135,8 +150,10 @@ class PrepareBaseModel:
 
     @staticmethod
     def IgfCNN(input_shape:tuple, num_classes:int, size:int, learning_rate:float):
+        input_shape = tuple(input_shape)
         inputs = Input(shape=input_shape)    
-        img_reshaped = Lambda(lambda x: tf.reshape(x, (-1,) + input_shape[1:]))(inputs)
+        img_reshaped = Lambda(lambda x: tf.reshape(x, (-1,) +input_shape[1:]))(inputs)
+        print("================image_reshaped=============", img_reshaped)
         processed_images = PrepareBaseModel.feat_concat(img_reshaped, size,input_shape[0])
 
         x = Conv2D(32, kernel_size=(3, 3), strides=(1, 1), activation='relu')(processed_images)

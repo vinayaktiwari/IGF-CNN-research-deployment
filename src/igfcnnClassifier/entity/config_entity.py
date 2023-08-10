@@ -46,7 +46,7 @@ class EvaluationConfig:
     path_of_model: Path
     training_data: Path
     all_params: dict
-    params_image_size: list
+    params_image_size: tuple
     params_batch_size: int
 
 
