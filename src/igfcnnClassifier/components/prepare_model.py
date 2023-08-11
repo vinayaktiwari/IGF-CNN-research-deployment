@@ -152,7 +152,7 @@ class PrepareBaseModel:
     def IgfCNN(input_shape:tuple, num_classes:int, size:int, learning_rate:float):
         input_shape = tuple(input_shape)
         inputs = Input(shape=input_shape)    
-        img_reshaped = Lambda(lambda x: tf.reshape(x, (-1,) +input_shape[1:]))(inputs)
+        img_reshaped = Lambda(lambda x: tf.reshape(x, (-1,) +tuple(input_shape[1:])))(inputs)
         print("================image_reshaped=============", img_reshaped)
         processed_images = PrepareBaseModel.feat_concat(img_reshaped, size,input_shape[0])
 
@@ -178,7 +178,7 @@ class PrepareBaseModel:
         model = Model(inputs=inputs, outputs=outputs)
 
         model.compile(
-            optimizer=tf.keras.optimizers.SGD(learning_rate=learning_rate), 
+            optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), 
             loss='categorical_crossentropy', 
             metrics=['accuracy'])
 

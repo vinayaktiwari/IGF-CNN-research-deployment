@@ -22,7 +22,7 @@ class ModelTrainingPipeline:
         training = Training(config=training_config,model=PrepareBaseModel,config1=model_config)
         # training.get_base_model()
         training.train_valid_generator()
-        training.train(callback_list=callback_list)
+        training.train()
 
 if __name__ == '__main__':
     try:

@@ -5,7 +5,7 @@ import ast
 import tensorflow as tf
 from pathlib import Path
 from src.igfcnnClassifier.entity.config_entity import PrepareBaseModelConfig
-
+from keras.callbacks import EarlyStopping,ReduceLROnPlateau
 
 
 class Training:
@@ -47,9 +47,6 @@ class Training:
             train_datagenerator = tf.keras.preprocessing.image.ImageDataGenerator(
                 rotation_range=40,
                 horizontal_flip=True,
-                width_shift_range=0.2,
-                height_shift_range=0.2,
-                shear_range=0.2,
                 zoom_range=0.2,
                 **datagenerator_kwargs
             )
@@ -68,11 +65,13 @@ class Training:
         model.save(path)
 
 
-    def train(self,callback_list: list):
+    def train(self):
         self.steps_per_epoch = self.train_generator.samples // self.train_generator.batch_size
         self.validation_steps = self.valid_generator.samples // self.valid_generator.batch_size
 
         image_size_tuple = ast.literal_eval(self.config1.params_image_size)
+
+        learning_rate_reduction = ReduceLROnPlateau(monitor="val_accuracy", patience =2, verbose=1,factor=0.05)
 
 
         model = self.model.IgfCNN(input_shape = image_size_tuple,
@@ -83,10 +82,8 @@ class Training:
 
         model.fit(self.train_generator,
             epochs=self.config.params_epochs,
-            steps_per_epoch=self.steps_per_epoch,
-            validation_steps=self.validation_steps,
             validation_data=self.valid_generator,
-            callbacks=callback_list)
+            callbacks=[learning_rate_reduction])
 
         self.save_model(
             path=self.config.trained_model_path,
