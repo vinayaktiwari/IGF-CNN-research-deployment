@@ -8,7 +8,8 @@
 ```python3 -m venv venv_name```
 ```source venv_name/bin/activate```
 ### step 3 - Install requirements
-``` # pip install -r requirements.txt```
-``` # python3 app.py```
+``` pip install -r requirements.txt```
+
+``` python3 app.py```
 
 
