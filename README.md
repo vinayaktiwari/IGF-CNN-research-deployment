@@ -18,5 +18,11 @@ Our work focused on outperforming or atleast matching the classification results
 ## Proposed Model Architecture
 
 
+![image](https://github.com/vinayaktiwari/IGF-CNN-research-deployment/assets/26620896/286d5b09-c907-48c2-825e-7dc9803396ee)
+
+
+
+![image](https://github.com/vinayaktiwari/IGF-CNN-research-deployment/assets/26620896/1df6ce35-1923-4405-9ed1-0dfc11c33582)
+
 
 
